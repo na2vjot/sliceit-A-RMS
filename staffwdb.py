@@ -1,39 +1,43 @@
-from datetime import datetime
-from sqlalchemy import Column, Integer, String, Float, DateTime, create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from flask import Flask, render_template, request, redirect, url_for
+import mysql.connector as sql
 
-Base = declarative_base()
+conn=sql.connect(host='Localhost',user='root',passwd='password',database='restaurant')
+if conn.is_connected():
+    print('successfully connected')
 
-class Staff(Base):
-    __tablename__ = 'staff'
+#creating staff table if it doesnt exist
+def create_staff():
+    c1=conn.cursor()
+    c1.execute('create table if not exists staff_management(staff_id INT PRIMARY KEY AUTO_INCREMENT,name VARCHAR(50),Role VARCHAR(50),age INT,salary INT)')
 
-    StaffId = Column(Integer, primary_key=True)
-    Role = Column(Integer)
-    UserName = Column(String)
-    Password = Column(String)
-    phone = Column(String)  # Assuming phone numbers can include non-numeric characters
-    Salary = Column(Float)
-    Daysoff = Column(String)
-    JoinedDate = Column(DateTime)
-    # Define relationships if needed, e.g., One-to-Many
-    # orders = relationship("Order", back_populates="staff")
-    # bills = relationship("Bill", back_populates="staff")
+#displaying existing staff details
+def display_staff():
+    c1=conn.cursor()
+    dquery="""select * from staff_management ORDER BY SALARY DESC"""
+    c1.execute(dquery)
+    rows = c1.fetchall()
+    for row in rows:
+        print(row)
 
-# Configure MySQL connection
-db_url = 'mysql+mysqlconnector://username:password@localhost/database_name'
-engine = create_engine(db_url)
+display_staff()
 
-# Create tables
-Base.metadata.create_all(engine)
+#managing/entering new staff details
+def manage_staff():
+    c1=conn.cursor()
+    squery="""INSERT INTO staff_management(name,Role,age,salary) VALUES (%s, %s, %s,%s)"""
+    L1=[]
+    name=input('enter the name of the employee:')
+    L1.append(name)
+    role=input('enter the role of the employee:')
+    L1.append(role)
+    age=int(input('enter age of employee:'))
+    L1.append(age)
+    salary=int(input('salary of the employee:'))
+    L1.append(salary)
+    c1.execute(squery,L1)
+    print("Employee added successfully.")
 
-# Create session
-Session = sessionmaker(bind=engine)
-session = Session()
 
-# Example usage:
-# staff_member = Staff(StaffId=1, Role=2, UserName="JohnDoe", Password="password123",
-#                     phone="123-456-7890", Salary=2500.00, Daysoff="Saturday, Sunday",
-#                     JoinedDate=datetime(2022, 1, 15))
-# session.add(staff_member)
-# session.commit()
+create_staff()
+manage_staff()
+conn.commit() #commiting the changes made in db
