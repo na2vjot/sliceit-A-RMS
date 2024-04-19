@@ -14,7 +14,7 @@ def create_feedback():
 create_feedback()
 
 #displaying existing feedbacks
-def display_staff():
+def display_feedback():
     c1=conn.cursor()
     dquery="""select * from feedback ORDER BY Rating"""
     c1.execute(dquery)
@@ -22,7 +22,7 @@ def display_staff():
     for row in rows:
         print(row)
         
-display_staff()
+display_feedback()
 
 #managing/entering new feedbacks
 def manage_feedback():
